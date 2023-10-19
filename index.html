@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alex's Algo Score Calculator</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: sans-serif;
+            background-color: #36393F;
+            color: #DCDDDE;
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        div.container {
+            width: 400px;
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 100px;
+            text-align: center;
+        }
+
+        label {
+            font-size: 9px;
+            font-weight: bold;
+            align-self: flex-start;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        input, button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2F3136;
+            color: #DCDDDE;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #7289DA;
+            width: 100%;
+        }
+
+        button:disabled {
+            background-color: #4E5156;
+            cursor: not-allowed;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        h3, h4 {
+            margin-top: 20px;
+        }
+
+        article {
+            width: 800px;
+            max-width: 80%;
+            padding-top: 30px;
+        }
+
+        em {
+            display: block;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Alex's Algo Score</h1>
+        <label for="T">Number of Trades</label>
+        <input type="number" id="T" placeholder="Enter T value" oninput="checkInputs()">
+        <label for="P">Profit Factor</label>
+        <input type="number" id="P" placeholder="Enter P value" oninput="checkInputs()">
+        <button onclick="calculateAndDisplayScore()" id="calculateBtn" disabled>Calculate</button>
+        <h2 id="result"></h2>
+        
+    </div>
+    <article>
+        <h3>How The Score Works</h3>
+        <em>If your final score is above 10 then you have a miracle money printer in your hands.</em>
+        <p style="text-align: center;">\( \text{Score'} = \frac{T^{\alpha} \times P \times \frac{1}{1 + e^{-\beta(P-P_0)}}}{10} \)</p>
+        <h4>Assumptions</h4>
+        <p>The following settings ensure that a score of 10 or above results in a smooth parabolic long-term equity curve:
+        <ul>
+            <li>\( \alpha \) = 0.87 - This supposes that a good number of trades approaching a profit factor of 3 is in the 100s of trades.</li>
+            <li>\( \beta \) = 1 - Basic steepness of the score’s sensitivity function</li>
+            <li>\( P_0 \) = 3 - This ensures that a long-term profit factor approaching 3, over 1000s of trades, should result in an excellent score.</li>
+        </ul>
+        </p>
+        <h4>Definitions</h4>
+        <p>
+            <strong>\( T \)</strong> = Total Number of Trades
+            <ul>
+                <li>Represents the total number of trades executed.</li>
+                <li>It's a key factor because a higher number of trades generally provides more confidence in the consistency of the profit factor.</li>
+            </ul>
+            <strong>\( P \)</strong> = Profit Factor
+            <ul>
+                <li>Represents the ratio of gross profit to gross loss.</li>
+                <li>A higher profit factor indicates profitability, but it's more significant when accompanied by a higher number of trades.</li>
+            </ul>
+            \( \alpha \) = Alpha
+            <ul>
+                <li>Represents the power to which \( T \) is raised.</li>
+                <li>A fractional value between 0 and 1 that ensures the impact of \( T \) on the score increases at a diminishing rate.</li>
+                <li>Helps reward a higher number of trades but ensures that the benefit of adding additional trades diminishes.</li>
+            </ul>
+            \( \beta \) = Beta
+            <ul>
+                <li>Controls the steepness of the logistic function \( f(P) \).</li>
+                <li>Adjusts the sensitivity of the score to changes in the profit factor.</li>
+            </ul>
+            \( P_0 \) (Profit Factor Midpoint):
+            <ul>
+                <li>Represents the midpoint of the logistic function \( f(P) \).</li>
+                <li>Set around a typical or "pivot" value of the profit factor to determine where the score starts to feel the impact of very high or very low profit factors.</li>
+            </ul>
+            \( f(P) \) = Profit Factor Modifier
+            <ul>
+                <li>A logistic function that acts as a modifier based on the value of \( P \).</li>
+                <li>Rewards typical values of the profit factor and penalizes extremely high profit factors, especially when the number of trades is low.</li>
+            </ul>
+            Score’ = Adjusted Score
+            <ul>
+                <li>The final computed score, reflecting the impact of trade numbers, the profit factor, and the designed modifiers.</li>
+                <li>Divided by 10 to keep it in a single-digit format for clarity and simplicity.</li>
+            </ul>
+        </p>
+    </article>
+
+    <script>
+        function calculateAndDisplayScore() {
+            const T = parseFloat(document.getElementById("T").value);
+            const P = parseFloat(document.getElementById("P").value);
+            const alpha = 0.7;
+            const beta = 1;
+            const P_0 = 3;
+            const f_P = 1 / (1 + Math.exp(-beta * (P - P_0)));
+            const score = (Math.pow(T, alpha) * P * f_P) / 10;
+            document.getElementById("result").innerText = `Score: ${score.toFixed(2)}`;
+        }
+
+        function checkInputs() {
+            const T = document.getElementById("T").value;
+            const P = document.getElementById("P").value;
+            document.getElementById("calculateBtn").disabled = !T || !P;
+        }
+    </script>
+    <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</body>
+
+</html>
